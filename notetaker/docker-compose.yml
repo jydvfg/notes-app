@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    env_file: .env
+    volumes:
+      - .:/app
+      - ./database_disk:/app/database_disk
+    ports:
+      - "8000:8000"
+    restart: always

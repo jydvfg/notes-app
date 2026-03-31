@@ -21,12 +21,12 @@ def editor(request):
         else:
             document = Document.objects.create(title=title, content = content)
 
-            return redirect("/?docid=%i % document.id")
+            return redirect('/?docid=%i' % document.id)
     
     if docid > 0:
         document = Document.objects.get(pk=docid)
     else:
-        document = ""
+        document = None
     context = {
         "docid": docid,
         "documents": documents,
