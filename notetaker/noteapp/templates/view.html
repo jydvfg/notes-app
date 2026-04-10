@@ -38,8 +38,7 @@
                 </div>
 
                 <div class="column is-10">
-                    <form method="post" action="{% url 'editor' docid %}">
-                        {% csrf_token %}
+                    
 
                         <div class="field">
                             <label class="label">
@@ -54,7 +53,7 @@
                             </label>
 
                             <div class="control">
-                                <input type="text" class="input" name="title" placeholder="Title"{% if document %} value="{{ document.title }}"{% endif %}>
+                                <h1 name="title" placeholder="Title"{% if document %} value="{{ document.title }}"{% endif %}>
                             </div>
                         </div>
 
@@ -62,22 +61,23 @@
                             <label class="label">Content</label>
 
                             <div class="control">
-                                <textarea class="textarea" name="content" placeholder="Content">{% if document %}{{ document.content }}{% endif %}</textarea>
+                                <p name="content" placeholder="Content">{% if document %}{{ document.content }}{% endif %}</p>
                             </div>
                         </div>
 
                         <div class="field is-grouped">
                             <div class="control">
-                                <button class="button is-primary">Save</button>
+                                <a href="{% url 'editor' docid %}"><button class="button is-primary">Edit</button></a>
                             </div>
 
+# To delete a document
                              {% if document %}
                                 <div class="control">
-                                    <a href="{% url 'delete_document' document.id %}" class="button is-danger">Delete</a>
+                                    <a href="{% url 'delete_document' docid %}" class="button is-danger">Delete</a>
                                 </div>
                             {% endif %}
+
                         </div>
-                    </form>
                 </div>
             </div>
         </section>

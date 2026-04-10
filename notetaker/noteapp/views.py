@@ -1,9 +1,38 @@
 from django.shortcuts import render, redirect
 
+
 from .models import Document
 
-def editor(request):
-    docid = int(request.GET.get("docid", 0))
+def view(request, docid=None):
+    documents = Document.objects.all()
+
+    if request.method == "GET":
+        title = request.GET.get("title")
+        content = request.GET.get("content")
+
+        if docid and docid > 0:
+            document = Document.objects.get(pk=docid)
+            document.title = title
+            document.content = content
+
+        else:
+            return redirect('editor', docid=0)
+    
+    if docid and docid > 0:
+        document = Document.objects.get(pk=docid)
+    else:
+        document = None
+        docid = 0
+    
+    context = {
+        "docid": docid,
+        "documents": documents,
+        "document": document
+    }
+
+    return render(request, "view.html", context)
+
+def editor(request, docid):
     documents = Document.objects.all()
 
     if request.method == "POST":
@@ -17,11 +46,11 @@ def editor(request):
              document.content = content
              document.save()
 
-             return redirect("\?docid=%i" % docid)
+             return redirect('view_note', docid=docid)
         else:
             document = Document.objects.create(title=title, content = content)
 
-            return redirect('/?docid=%i' % document.id)
+            return redirect('view_note', docid=document.id)
     
     if docid > 0:
         document = Document.objects.get(pk=docid)
@@ -39,5 +68,5 @@ def delete_document(request, docid):
     document = Document.objects.get(pk=docid)
     document.delete()
 
-    return redirect('/?docid=0')
+    return redirect('view')
 
