@@ -33,6 +33,11 @@ def view(request, docid=None):
     return render(request, "view.html", context)
 
 def editor(request, docid):
+    print("=== EDITOR VIEW CALLED ===")
+    print(f"Method: {request.method}")
+    print(f"POST data: {request.POST}")
+    print(f"docid from URL: {docid}")
+    
     documents = Document.objects.all()
 
     if request.method == "POST":

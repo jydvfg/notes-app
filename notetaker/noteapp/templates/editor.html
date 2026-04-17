@@ -40,6 +40,7 @@
                 <div class="column is-10">
                     <form method="post" action="{% url 'editor' docid %}">
                         {% csrf_token %}
+                        <input type="hidden" name="docid" value="{{ docid }}">
 
                         <div class="field">
                             <label class="label">
