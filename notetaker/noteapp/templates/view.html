@@ -53,7 +53,7 @@
                             </label>
 
                             <div class="control">
-                                <h1 name="title" placeholder="Title"{% if document %} value="{{ document.title }}"{% endif %}>
+                                <h1 name="title" placeholder="Title"{% if document %} value="{{ document.title }}"{% endif %}>{% if document %}{{document.title}}{% endif %}</h1>
                             </div>
                         </div>
 
