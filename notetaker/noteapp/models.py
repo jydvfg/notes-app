@@ -6,6 +6,7 @@ class Document(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
+    password_hash = models.CharField(max_length=128, blank=True, null=True)
 
     class Meta:
         ordering = ('title',)
