@@ -18,7 +18,8 @@ def view(request, docid=None):
             requires_password = bool(document.password_hash)
     else:
         document = None
-        requires_password = None
+        requires_password = False
+        docid = 0
 
     if request.method == "POST":
         submitted_pw = request.POST.get("password")
