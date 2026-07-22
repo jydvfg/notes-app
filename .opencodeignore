@@ -1,0 +1,9 @@
+# .opencodeignore
+venv/
+database_disk/
+__pycache__/
+*.sqlite3
+*.pyc
+.git/
+media/
+static/
