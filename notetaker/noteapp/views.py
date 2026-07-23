@@ -5,7 +5,16 @@ from django.contrib.auth.hashers import make_password, check_password
 from .models import Document
 
 def view(request, docid=None):
-    documents = Document.objects.all()
+    documents_qs = Document.objects.all().order_by("-created_at")
+
+    documents_list = [
+        {
+            "id": doc.id,
+            "title": doc.title,
+            "created_at": doc.created_at.isoformat() if doc.created_at else None
+        }
+        for doc in documents_qs
+    ]
     authenticated = False
     wrong_password = False
     
@@ -34,7 +43,7 @@ def view(request, docid=None):
     
     context = {
         "docid": docid,
-        "documents": documents,
+        "documents_list": documents_list,
         "document": document if (not requires_password or authenticated) else None,
         "requires_password": requires_password and not authenticated,
         "wrong_password": wrong_password
@@ -48,7 +57,8 @@ def editor(request, docid):
     print(f"POST data: {request.POST}")
     print(f"docid from URL: {docid}")
     
-    documents = Document.objects.all()
+    documents_qs = Document.objects.all().order_by("-created_at")
+    documents_list = list(Document.objects.all().values('id', 'title', 'created_at'))
 
     if request.method == "POST":
         submitted_docid = int(request.POST.get("docid", 0))
@@ -58,8 +68,7 @@ def editor(request, docid):
         plain_pw = request.POST.get("password") 
 
         if submitted_docid > 0:
-             document = Document.objects.get(pk=docid)
-
+            document = Document.objects.get(pk=submitted_docid) 
         else:
             document = Document()
         
@@ -74,14 +83,14 @@ def editor(request, docid):
         document.save()
         return redirect("view_note", docid=document.id)
 
-    
     if docid > 0:
         document = Document.objects.get(pk=docid)
     else:
         document = None
+        
     context = {
         "docid": docid,
-        "documents": documents,
+        "documents_list": documents_list,
         "document": document
     }
 

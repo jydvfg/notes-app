@@ -20,8 +20,8 @@ from noteapp.views import view, editor, delete_document
 
 urlpatterns = [
     path("", view, name="view"),
-    path("<int:docid>/", view, name="view_note"),
+    path("note/<int:docid>/", view, name="view_note"),
     path("edit/<int:docid>/", editor, name="editor"),
-    path('admin/', admin.site.urls),
-    path("delete_document/<int:docid>/", delete_document, name="delete_document")
+    path("admin/", admin.site.urls),
+    path("delete_document/<int:docid>/", delete_document, name="delete_document"),
 ]

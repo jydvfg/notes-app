@@ -23,19 +23,134 @@
 
         <section class="section">
             <div class="columns">
-                <div class="column is-2">
-                    <aside class="menu">
-                        <p class="menu-label">Documents</p>
+               <div class="column is-2">
+    <aside class="menu">
+        <p class="menu-label">Documents</p>
+        <ul class="menu-list" id="documents-accordion"></ul>
+    </aside>
 
-                        <ul class="menu-list">
-                            {% for doc in documents %}
-                                <li>
-                                    <a href="{% url 'view_note' doc.id %}">{{ doc.title }}</a>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    </aside>
-                </div>
+    {{ documents_list|json_script:"documents-data" }}
+
+    <style>
+        .menu-list {
+            transition: all 0.2s ease;
+        }
+
+        ul.menu-list.is-collapsed {
+            display: none;
+        }
+
+        .menu-list > li > a {
+            cursor: pointer;
+            padding: 0.5em 1em;
+        }
+
+        .menu-list > li > a:hover {
+            background-color: #f5f5f5;
+        }
+
+        .menu-list > li > a.is-active {
+            background-color: #e0e0e0;
+            font-weight: bold;
+        }
+    </style>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const dataElement = document.getElementById('documents-data');
+    if (!dataElement) {
+        console.error("The #documents-data script tag is MISSING from the HTML!");
+        return; 
+    }
+    
+    const documents = JSON.parse(dataElement.textContent);
+    console.log("Here are the notes:", documents);
+        const activeDocumentId = {{ document.id|default:'null' }};
+        
+        const documentsWithDates = documents.map(doc => ({
+            ...doc,
+            created_at: new Date(doc.created_at)
+        }));
+
+        function formatDate(date) {
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            return `${months[date.getMonth()]} ${date.getFullYear()}`;
+        }
+
+        function groupDocuments(docs) {
+            const years = {};
+            docs.forEach(doc => {
+                const date = doc.created_at;
+                const year = date.getFullYear();
+                const month = formatDate(date);
+                if (!years[year]) years[year] = {};
+                if (!years[year][month]) years[year][month] = [];
+                years[year][month].push(doc);
+            });
+            return years;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function renderAccordion(years, activeDocId) {
+            const html = Object.entries(years)
+                .sort(([a], [b]) => b.localeCompare(a))
+                .map(([year, months]) => {
+                    const monthHtml = Object.entries(months)
+                        .sort(([a], [b]) => b.localeCompare(a))
+                        .map(([month, notes]) => {
+                            const notesHtml = notes
+                                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+                                .map(doc => {
+                                    const isActiveClass = (activeDocId && doc.id === activeDocId) ? 'is-active' : '';
+                                    return `<li><a href="/note/${doc.id}/" class="${isActiveClass}">${escapeHtml(doc.title)}</a></li>`;
+                                })
+                                .join('');
+                            
+                            return `<li><a href="#" data-month="${month}">${escapeHtml(month)}</a><ul class="menu-list is-collapsed">${notesHtml}</ul></li>`;
+                        })
+                        .join('');
+                    
+                    return `<li><a href="#" data-year="${year}">${escapeHtml(year)}</a><ul class="menu-list is-collapsed">${monthHtml}</ul></li>`;
+                })
+                .join('');
+            return html;
+        }
+
+        const grouped = groupDocuments(documentsWithDates);
+        document.getElementById('documents-accordion').innerHTML = renderAccordion(grouped, activeDocumentId);
+
+        document.querySelectorAll('#documents-accordion a[data-year], #documents-accordion a[data-month]').forEach(header => {
+            header.addEventListener('click', (e) => {
+                e.preventDefault();
+                const nextUl = header.nextElementSibling;
+                if (nextUl && nextUl.tagName === 'UL') {
+                    nextUl.classList.toggle('is-collapsed');
+                }
+            });
+        });
+
+        if (activeDocumentId && activeDocumentId !== 'null') {
+            const activeDoc = documentsWithDates.find(d => d.id === activeDocumentId);
+            if (activeDoc) {
+                const yearElement = document.querySelector(`[data-year="${activeDoc.created_at.getFullYear()}"]`);
+                const monthElement = document.querySelector(`[data-month="${formatDate(activeDoc.created_at)}"]`);
+                
+                if (yearElement && yearElement.nextElementSibling) {
+                    yearElement.nextElementSibling.classList.remove('is-collapsed');
+                }
+                if (monthElement && monthElement.nextElementSibling) {
+                    monthElement.nextElementSibling.classList.remove('is-collapsed');
+                }
+            }
+        }
+    });
+    </script>
+</div>
 
                 <div class="column is-10">
                     <form method="post" action="{% url 'editor' docid %}">
