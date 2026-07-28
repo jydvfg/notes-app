@@ -1,5 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.hashers import make_password, check_password
+from django.core.paginator import Paginator
+from django.db.models import Q
 
 
 from .models import Document
@@ -101,4 +103,36 @@ def delete_document(request, docid):
     document.delete()
 
     return redirect('view')
+
+
+def search_notes(request):
+    search_query = request.GET.get('q', '')
+    documents_qs = Document.objects.all().order_by("-created_at")
+
+    # Case-insensitive search across title and content
+    if search_query:
+        documents_qs = documents_qs.filter(
+            Q(title__icontains=search_query) | Q(content__icontains=search_query)
+        )
+
+    paginator = Paginator(documents_qs, 10)  # Show 10 results per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    documents_list = [
+        {
+            "id": doc.id,
+            "title": doc.title,
+            "created_at": doc.created_at.isoformat() if doc.created_at else None
+        }
+        for doc in page_obj
+    ]
+
+    context = {
+        "documents_list": documents_list,
+        "search_query": search_query,
+        "page_obj": page_obj
+    }
+
+    return render(request, "search.html", context)
 

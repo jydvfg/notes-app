@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from noteapp.views import view, editor, delete_document
+from noteapp.views import view, editor, delete_document, search_notes
 
 urlpatterns = [
     path("", view, name="view"),
@@ -24,4 +24,5 @@ urlpatterns = [
     path("edit/<int:docid>/", editor, name="editor"),
     path("admin/", admin.site.urls),
     path("delete_document/<int:docid>/", delete_document, name="delete_document"),
+    path("search/", search_notes, name="search_notes"),
 ]

@@ -110,54 +110,58 @@
                 </div>
 
                 <div class="column is-10">
-                    {% if requires_password %}
-                         <form method="post">
-                            {% csrf_token %}
-                            <div class="field">
-                                <label class="label"> This note is password protected</label>
-                                <div class="control"><input class="input" type="password" name="password" placeholder="Enter password"></div>
-                            </div>
-                            <div class="control"><button class="button is-primary">Submit</button></div>
-                         </form>
-                    {% else %}
-                        
-                        <div class="field">
-                            <label class="label">
-                                Title
-
-                                {% if document %}
-                                    <span class="has-text-grey-light">
-                                        Created at: {{ document.created_at|date:"m/d Y" }} / 
-                                        Modified at: {{ document.modified_at|date:"m/d Y" }}
-                                    </span>
-                                {% endif %}
-                            </label>
-
-                            <div class="control">
-                                <h1 name="title" placeholder="Title"{% if document %} value="{{ document.title }}"{% endif %}>{% if document %}{{document.title}}{% endif %}</h1>
-                            </div>
+                    <h1 class="title is-4">Search Notes</h1>
+                    
+                    <form method="get" action="{% url 'search_notes' %}" class="field has-addons">
+                        <div class="control is-expanded">
+                            <input class="input" type="text" name="q" placeholder="Search notes..." value="{{ search_query }}">
                         </div>
-
-                        <div class="field">
-                            <label class="label">Content</label>
-
+                        {% if search_query %}
                             <div class="control">
-                                <p name="content" placeholder="Content">{% if document %}{{ document.content|linebreaksbr }}{% endif %}</p>
+                                <a href="{% url 'search_notes' %}" class="button is-light">Clear</a>
                             </div>
+                        {% endif %}
+                        <div class="control">
+                            <button class="button is-primary">Search</button>
                         </div>
+                    </form>
 
-                        <div class="field is-grouped">
-                            <div class="control">
-                                <a href="{% url 'editor' docid %}"><button class="button is-primary">Edit</button></a>
+                    {% if search_query %}
+                        <h2 class="title is-5 mt-5">Results for "{{ search_query }}"</h2>
+
+                        {% if page_obj %}
+                            <div class="box mt-3">
+                                {% for doc in page_obj %}
+                                    <div class="media">
+                                        <div class="media-content">
+                                            <a href="{% url 'view_note' doc.id %}" class="title is-5">
+                                                {{ doc.title }}
+                                            </a>
+                                            <p class="subtitle is-6 mt-1 has-text-grey">
+                                                Created: {{ doc.created_at }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    {% if not forloop.last %}<hr>{% endif %}
+                                {% endfor %}
                             </div>
 
-                            {% if document %}
-                                <div class="control">
-                                    <a href="{% url 'delete_document' docid %}" class="button is-danger">Delete</a>
-                                </div>
+                            {% if page_obj.has_previous or page_obj.has_next %}
+                                <nav class="pagination is-centered mt-4" role="navigation">
+                                    {% if page_obj.has_previous %}
+                                        <a href="?q={{ search_query }}&page={{ page_obj.previous_page_number }}" class="pagination-previous">Previous</a>
+                                    {% endif %}
+                                    {% if page_obj.has_next %}
+                                        <a href="?q={{ search_query }}&page={{ page_obj.next_page_number }}" class="pagination-next">Next page</a>
+                                    {% endif %}
+                                    <ul class="pagination-list">
+                                        <li><span class="pagination-link is-current">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+                                    </ul>
+                                </nav>
                             {% endif %}
-
-                        </div>
+                        {% else %}
+                            <p class="has-text-grey mt-4">No matching notes found.</p>
+                        {% endif %}
                     {% endif %}
                 </div>
             </div>
