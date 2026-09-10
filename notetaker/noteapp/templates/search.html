@@ -1,117 +1,25 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Search Notes</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+        {% include "partials/_theme.html" %}
     </head>
 
     <body>
-        <nav class="navbar is-dark">
-            <div class="navbar-brand">
-                <a href="{% url 'home' %}" class="navbar-item">Notes</a>
-            </div>
-
-            <div class="navbar-menu">
-                <div class="navbar-end">
-                    <a href="{% url 'search_notes' %}" class="navbar-item">Search</a>
-                    <a href="{% url 'editor' 0 %}" class="navbar-item">New document</a>
-                </div>
-            </div>
-        </nav>
+        {% include "partials/_navbar.html" %}
 
         <section class="section">
             <div class="columns">
                 <div class="column is-2">
-                    <aside class="menu">
-                        <p class="menu-label">Documents</p>
-                        <ul class="menu-list" id="documents-accordion"></ul>
-                    </aside>
-
-                    {{ documents_list|json_script:"documents-data" }}
-
-                    <style>
-                        .menu-list { transition: all 0.2s ease; }
-                        ul.menu-list.is-collapsed { display: none; }
-                        .menu-list > li > a { cursor: pointer; padding: 0.5em 1em; }
-                        .menu-list > li > a:hover { background-color: #f5f5f5; }
-                        .menu-list > li > a.is-active { background-color: #e0e0e0; font-weight: bold; }
-                    </style>
-
-                    <script>
-                    document.addEventListener('DOMContentLoaded', () => {
-                        const dataElement = document.getElementById('documents-data');
-                        if (!dataElement) return;
-                        const documents = JSON.parse(dataElement.textContent);
-                        const documentsWithDates = documents.map(doc => ({
-                            ...doc,
-                            created_at: new Date(doc.created_at)
-                        }));
-
-                        function formatDate(date) {
-                            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                            return `${months[date.getMonth()]} ${date.getFullYear()}`;
-                        }
-
-                        function groupDocuments(docs) {
-                            const years = {};
-                            docs.forEach(doc => {
-                                const date = doc.created_at;
-                                const year = date.getFullYear();
-                                const month = formatDate(date);
-                                if (!years[year]) years[year] = {};
-                                if (!years[year][month]) years[year][month] = [];
-                                years[year][month].push(doc);
-                            });
-                            return years;
-                        }
-
-                        function escapeHtml(text) {
-                            const div = document.createElement('div');
-                            div.textContent = text;
-                            return div.innerHTML;
-                        }
-
-                        function renderAccordion(years) {
-                            return Object.entries(years)
-                                .sort(([a], [b]) => b.localeCompare(a))
-                                .map(([year, months]) => {
-                                    const monthNum = { 'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6, 'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12 };
-                                    const monthHtml = Object.entries(months)
-                                        .sort(([a], [b]) => monthNum[b] - monthNum[a])
-                                        .map(([month, notes]) => {
-                                            const notesHtml = notes
-                                                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-                                                .map(doc => `<li><a href="/note/${doc.id}/">${escapeHtml(doc.title)}</a></li>`)
-                                                .join('');
-                                            return `<li><a href="#" data-month="${month}">${escapeHtml(month)}</a><ul class="menu-list is-collapsed">${notesHtml}</ul></li>`;
-                                        })
-                                        .join('');
-                                    return `<li><a href="#" data-year="${year}">${escapeHtml(year)}</a><ul class="menu-list is-collapsed">${monthHtml}</ul></li>`;
-                                })
-                                .join('');
-                        }
-
-                        const grouped = groupDocuments(documentsWithDates);
-                        document.getElementById('documents-accordion').innerHTML = renderAccordion(grouped);
-
-                        document.querySelectorAll('#documents-accordion a[data-year], #documents-accordion a[data-month]').forEach(header => {
-                            header.addEventListener('click', (e) => {
-                                e.preventDefault();
-                                const nextUl = header.nextElementSibling;
-                                if (nextUl && nextUl.tagName === 'UL') {
-                                    nextUl.classList.toggle('is-collapsed');
-                                }
-                            });
-                        });
-                    });
-                    </script>
+                    {% include "partials/_sidebar.html" %}
                 </div>
 
                 <div class="column is-10">
                     <h1 class="title is-4">Search Notes</h1>
-                    
+
                     <form method="get" action="{% url 'search_notes' %}" class="field has-addons">
                         <div class="control is-expanded">
                             <input class="input" type="text" name="q" placeholder="Search notes..." value="{{ search_query }}">

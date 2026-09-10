@@ -1,0 +1,41 @@
+{% comment %}
+Shared top navigation. Includes a Bulma navbar-burger so the right-hand links
+(Search / New document / theme toggle) are reachable on mobile.
+{% endcomment %}
+<nav class="navbar is-dark" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+        <a href="{% url 'home' %}" class="navbar-item">Notes</a>
+
+        <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="main-navbar">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </a>
+    </div>
+
+    <div id="main-navbar" class="navbar-menu">
+        <div class="navbar-end">
+            <a href="{% url 'search_notes' %}" class="navbar-item">Search</a>
+            <a href="{% url 'editor' 0 %}" class="navbar-item">New document</a>
+            <a role="button" tabindex="0" class="navbar-item" onclick="toggleTheme()" title="Toggle dark mode">
+                <span class="theme-icon-dark" aria-hidden="true">&#9789;</span>
+                <span class="theme-icon-light" aria-hidden="true">&#9728;</span>
+                <span class="is-sr-only">Toggle dark mode</span>
+            </a>
+        </div>
+    </div>
+</nav>
+
+<script>
+    (function () {
+        var burger = document.querySelector('.navbar-burger');
+        var menu = document.getElementById('main-navbar');
+        if (!burger || !menu) return;
+
+        burger.addEventListener('click', function () {
+            var isActive = burger.classList.toggle('is-active');
+            menu.classList.toggle('is-active', isActive);
+            burger.setAttribute('aria-expanded', isActive ? 'true' : 'false');
+        });
+    })();
+</script>

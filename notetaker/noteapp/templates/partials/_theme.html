@@ -1,0 +1,138 @@
+{% comment %}
+Shared theme layer: anti-flash init (runs before paint), design tokens and
+dark-mode overrides for the Bulma 0.9.4 classes this app actually uses.
+No static files needed, so it works under Gunicorn with DEBUG=False.
+{% endcomment %}
+<script>
+    (function () {
+        try {
+            var saved = localStorage.getItem('theme');
+            if (saved !== 'light' && saved !== 'dark') {
+                saved = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+            document.documentElement.setAttribute('data-theme', saved);
+        } catch (e) {
+            document.documentElement.setAttribute('data-theme', 'light');
+        }
+    })();
+
+    function toggleTheme() {
+        var root = document.documentElement;
+        var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        root.setAttribute('data-theme', next);
+        try { localStorage.setItem('theme', next); } catch (e) {}
+    }
+</script>
+
+<style>
+    :root {
+        --bg: #ffffff;
+        --text: #363636;
+        --muted: #7a7a7a;
+        --surface: #ffffff;
+        --border: #dbdbdb;
+        --hover-bg: #f5f5f5;
+        --active-bg: #e0e0e0;
+        --input-bg: #ffffff;
+        --link: #485fc7;
+    }
+
+    html[data-theme="dark"] {
+        --bg: #14161a;
+        --text: #e6e6e6;
+        --muted: #9aa0a6;
+        --surface: #1d2026;
+        --border: #34383f;
+        --hover-bg: #262a31;
+        --active-bg: #30353d;
+        --input-bg: #23272e;
+        --link: #7cb7ff;
+    }
+
+    html, body {
+        background-color: var(--bg);
+        color: var(--text);
+    }
+
+    .title, .subtitle, .label, h1, h2, h3, h4, h5, h6, strong, p, li, td, th {
+        color: var(--text);
+    }
+
+    .has-text-grey, .has-text-grey-light {
+        color: var(--muted) !important;
+    }
+
+    a { color: var(--link); }
+    a:hover { color: var(--link); }
+
+    .box {
+        background-color: var(--surface);
+        color: var(--text);
+        box-shadow: 0 0 0 1px var(--border), 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+
+    hr { background-color: var(--border); height: 1px; }
+
+    .input, .textarea, .select select {
+        background-color: var(--input-bg);
+        color: var(--text);
+        border-color: var(--border);
+    }
+
+    .input::placeholder, .textarea::placeholder { color: var(--muted); }
+    .input:focus, .textarea:focus { border-color: var(--link); box-shadow: none; }
+
+    .button.is-light {
+        background-color: var(--surface);
+        color: var(--text);
+        border-color: var(--border);
+    }
+
+    .tag.is-warning.is-light {
+        background-color: var(--hover-bg);
+        color: #ffdd57;
+    }
+
+    .pagination-link, .pagination-next, .pagination-previous {
+        background-color: var(--surface);
+        border-color: var(--border);
+        color: var(--text);
+    }
+
+    .pagination-link.is-current {
+        background-color: var(--link);
+        border-color: var(--link);
+        color: #fff;
+    }
+
+    /* Sidebar accordion */
+    .menu-label { color: var(--muted); }
+    .menu-list a { color: var(--text); }
+    .menu-list a:hover {
+        background-color: var(--hover-bg);
+        color: var(--text);
+    }
+    .menu-list a.is-active {
+        background-color: var(--active-bg);
+        color: var(--text);
+        font-weight: bold;
+    }
+    .menu-list { transition: all 0.2s ease; }
+    ul.menu-list.is-collapsed { display: none; }
+    .menu-list > li > a { cursor: pointer; padding: 0.5em 1em; }
+
+    /* Theme toggle icon swap */
+    .theme-icon-light { display: none; }
+    html[data-theme="dark"] .theme-icon-dark { display: none; }
+    html[data-theme="dark"] .theme-icon-light { display: inline; }
+
+    /* Keep the last navbar link (theme toggle) clear of the burger on mobile */
+    @media screen and (max-width: 1023px) {
+        .navbar-menu.is-active { background-color: #0a0a0a; }
+        .navbar-menu.is-active .navbar-item { color: rgba(255, 255, 255, 0.8); }
+        .navbar-menu.is-active .navbar-item:hover {
+            background-color: #363636;
+            color: #fff;
+        }
+    }
+</style>
