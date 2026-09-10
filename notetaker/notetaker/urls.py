@@ -16,10 +16,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from noteapp.views import view, editor, delete_document, search_notes
+from noteapp.views import home, view, editor, delete_document, search_notes
 
 urlpatterns = [
-    path("", view, name="view"),
+    path("", home, name="home"),
     path("note/<int:docid>/", view, name="view_note"),
     path("edit/<int:docid>/", editor, name="editor"),
     path("admin/", admin.site.urls),

@@ -6,6 +6,28 @@ from django.db.models import Q
 
 from .models import Document
 
+def home(request):
+    """Landing page: the newest notes, paginated, newest first."""
+    documents_qs = Document.objects.all().order_by("-created_at")
+    paginator = Paginator(documents_qs, 10)
+    page_obj = paginator.get_page(request.GET.get("page"))
+
+    documents_list = [
+        {
+            "id": doc.id,
+            "title": doc.title,
+            "created_at": doc.created_at.isoformat() if doc.created_at else None
+        }
+        for doc in documents_qs
+    ]
+
+    context = {
+        "page_obj": page_obj,
+        "documents_list": documents_list,
+    }
+
+    return render(request, "home.html", context)
+
 def view(request, docid=None):
     documents_qs = Document.objects.all().order_by("-created_at")
 
@@ -102,7 +124,7 @@ def delete_document(request, docid):
     document = Document.objects.get(pk=docid)
     document.delete()
 
-    return redirect('view')
+    return redirect('home')
 
 
 def search_notes(request):

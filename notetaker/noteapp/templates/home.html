@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Search Notes</title>
+        <title>Notes</title>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
     </head>
 
@@ -110,53 +110,57 @@
                 </div>
 
                 <div class="column is-10">
-                    {% if requires_password %}
-                         <form method="post">
-                            {% csrf_token %}
-                            <div class="field">
-                                <label class="label"> This note is password protected</label>
-                                <div class="control"><input class="input" type="password" name="password" placeholder="Enter password"></div>
-                            </div>
-                            <div class="control"><button class="button is-primary">Submit</button></div>
-                         </form>
-                    {% else %}
-                        
-                        <div class="field">
-                            <label class="label">
-                                Title
+                    <h1 class="title is-4">Latest Notes</h1>
+                    <p class="subtitle is-6 has-text-grey">
+                        {{ page_obj.paginator.count }} note{{ page_obj.paginator.count|pluralize }} in your local vault
+                    </p>
 
-                                {% if document %}
-                                    <span class="has-text-grey-light">
-                                        Created at: {{ document.created_at|date:"m/d Y" }} / 
-                                        Modified at: {{ document.modified_at|date:"m/d Y" }}
-                                    </span>
-                                {% endif %}
-                            </label>
-
-                            <div class="control">
-                                <h1 name="title" placeholder="Title"{% if document %} value="{{ document.title }}"{% endif %}>{% if document %}{{document.title}}{% endif %}</h1>
-                            </div>
+                    <form method="get" action="{% url 'search_notes' %}" class="field has-addons">
+                        <div class="control is-expanded">
+                            <input class="input" type="text" name="q" placeholder="Search notes...">
                         </div>
-
-                        <div class="field">
-                            <label class="label">Content</label>
-
-                            <div class="control">
-                                <p name="content" placeholder="Content">{% if document %}{{ document.content|linebreaksbr }}{% endif %}</p>
-                            </div>
+                        <div class="control">
+                            <button class="button is-primary">Search</button>
                         </div>
+                    </form>
 
-                        <div class="field is-grouped">
-                            <div class="control">
-                                <a href="{% url 'editor' docid %}"><button class="button is-primary">Edit</button></a>
-                            </div>
-
-                            {% if document %}
-                                <div class="control">
-                                    <a href="{% url 'delete_document' docid %}" class="button is-danger">Delete</a>
+                    {% if page_obj.object_list %}
+                        <div class="box mt-4">
+                            {% for doc in page_obj %}
+                                <div class="media">
+                                    <div class="media-content">
+                                        <a href="{% url 'view_note' doc.id %}" class="title is-5">
+                                            {{ doc.title }}
+                                        </a>
+                                        {% if doc.password_hash %}
+                                            <span class="tag is-warning is-light ml-2">Protected</span>
+                                        {% endif %}
+                                        <p class="subtitle is-6 mt-1 has-text-grey">
+                                            Created: {{ doc.created_at }} / Modified: {{ doc.modified_at }}
+                                        </p>
+                                    </div>
                                 </div>
-                            {% endif %}
+                                {% if not forloop.last %}<hr>{% endif %}
+                            {% endfor %}
+                        </div>
 
+                        {% if page_obj.has_previous or page_obj.has_next %}
+                            <nav class="pagination is-centered mt-4" role="navigation">
+                                {% if page_obj.has_previous %}
+                                    <a href="?page={{ page_obj.previous_page_number }}" class="pagination-previous">Previous</a>
+                                {% endif %}
+                                {% if page_obj.has_next %}
+                                    <a href="?page={{ page_obj.next_page_number }}" class="pagination-next">Next page</a>
+                                {% endif %}
+                                <ul class="pagination-list">
+                                    <li><span class="pagination-link is-current">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+                                </ul>
+                            </nav>
+                        {% endif %}
+                    {% else %}
+                        <div class="box mt-4 has-text-centered">
+                            <p class="has-text-grey">No notes yet.</p>
+                            <a href="{% url 'editor' 0 %}" class="button is-primary mt-3">Create your first note</a>
                         </div>
                     {% endif %}
                 </div>
